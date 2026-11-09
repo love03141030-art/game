@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>低血糖的辨識與處理｜糖友與家屬團體衛教</title>
+  <style>
+    /* ========================================================
+       基礎重置與色彩變數 (專為高齡長者與高對比設計)
+       ======================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-dark: #0f172a;
+      --slide-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #334155;
+      --primary-blue: #0284c7;
+      --primary-blue-dark: #0369a1;
+      --primary-blue-light: #e0f2fe;
+      --danger-red: #b91c1c;
+      --danger-red-dark: #7f1d1d;
+      --danger-red-light: #fee2e2;
+      --warning-amber: #b45309;
+      --warning-amber-light: #fef3c7;
+      --success-green: #15803d;
+      --success-green-light: #dcfce7;
+      --border-strong: #94a3b8;
+      --border-dark: #334155;
+      
+      /* 強制字體大小規範：內文至少 28px，標題 48px 以上 */
+      --font-title: max(48px, 3.2vw);
+      --font-subtitle: max(32px, 2.2vw);
+      --font-body: max(28px, 1.85vw);
+      --font-highlight: max(72px, 5.2vw);
+      --font-badge: max(22px, 1.4vw);
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* 16:9 簡報主視窗容器 */
+    .deck-container {
+      position: relative;
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      aspect-ratio: 16 / 9;
+      background-color: var(--slide-bg);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* 點擊換頁提示與感應遮罩 */
+    .click-zone-left, .click-zone-right {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      z-index: 5;
+      cursor: pointer;
+    }
+    .click-zone-left {
+      left: 0;
+      width: 30%;
+    }
+    .click-zone-right {
+      right: 0;
+      width: 70%;
+    }
+
+    /* 單頁投影片結構 */
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: clamp(24px, 3vw, 44px) clamp(32px, 4vw, 56px) clamp(64px, 5vw, 80px);
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      background-color: #ffffff;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.25s ease-in-out;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      z-index: 20;
+    }
+
+    /* 頁面標題區 */
+    .slide-header {
+      margin-bottom: clamp(16px, 2vh, 28px);
+      border-bottom: 4px solid var(--border-dark);
+      padding-bottom: clamp(10px, 1.2vh, 16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .slide-header h2 {
+      font-size: var(--font-title);
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+    }
+
+    .header-badge {
+      font-size: var(--font-badge);
+      font-weight: 700;
+      background-color: var(--text-main);
+      color: #ffffff;
+      padding: 6px 16px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* 幻燈片內文主區塊 */
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      font-size: var(--font-body);
+      line-height: 1.45;
+      font-weight: 600;
+      color: var(--text-main);
+      position: relative;
+      z-index: 25;
+    }
+
+    /* 高對比重點卡片 */
+    .card-grid {
+      display: grid;
+      gap: clamp(14px, 1.6vw, 24px);
+      width: 100%;
+    }
+
+    .card-grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card-grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .info-card {
+      background-color: #f8fafc;
+      border: 3px solid var(--border-dark);
+      border-radius: 16px;
+      padding: clamp(16px, 2vw, 24px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-card.alert {
+      background-color: var(--danger-red-light);
+      border-color: var(--danger-red);
+      color: var(--danger-red-dark);
+    }
+
+    .info-card.success {
+      background-color: var(--success-green-light);
+      border-color: var(--success-green);
+      color: #14532d;
+    }
+
+    .info-card.warning {
+      background-color: var(--warning-amber-light);
+      border-color: var(--warning-amber);
+      color: #78350f;
+    }
+
+    .info-card.blue {
+      background-color: var(--primary-blue-light);
+      border-color: var(--primary-blue-dark);
+      color: var(--primary-blue-dark);
+    }
+
+    .card-title {
+      font-size: var(--font-subtitle);
+      font-weight: 800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* 6 大症狀專用格線與大圖示 */
+    .symptom-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: clamp(12px, 1.5vw, 20px);
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .symptom-card {
+      background: #f8fafc;
+      border: 3px solid var(--border-dark);
+      border-radius: 16px;
+      padding: clamp(10px, 1.5vw, 16px);
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 1.8vw, 20px);
+    }
+
+    .symptom-icon {
+      width: clamp(64px, 6.5vw, 84px);
+      height: clamp(64px, 6.5vw, 84px);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border: 2px solid var(--border-dark);
+      border-radius: 14px;
+      padding: 8px;
+    }
+
+    .symptom-icon svg {
+      width: 100%;
+      height: 100%;
+      stroke: var(--text-main);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .symptom-text h3 {
+      font-size: var(--font-subtitle);
+      font-weight: 800;
+      color: var(--danger-red-dark);
+      margin-bottom: 4px;
+    }
+
+    .symptom-text p {
+      font-size: clamp(22px, 1.6vw, 26px);
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.25;
+    }
+
+    /* 第 8 頁：翻牌問答元件 */
+    .qa-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(14px, 1.8vw, 24px);
+      height: 82%;
+    }
+
+    .flip-card {
+      background-color: transparent;
+      perspective: 1000px;
+      cursor: pointer;
+      height: 100%;
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      border-radius: 20px;
+    }
+
+    .flip-card.is-flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      inset: 0;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      padding: clamp(16px, 2vw, 24px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      border: 4px solid var(--border-dark);
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
+    }
+
+    .flip-card-front {
+      background: #eff6ff;
+      border-color: var(--primary-blue-dark);
+      color: var(--text-main);
+    }
+
+    .flip-card-back {
+      background: #fef2f2;
+      border-color: var(--danger-red);
+      color: var(--danger-red-dark);
+      transform: rotateY(180deg);
+    }
+
+    .qa-badge {
+      font-size: var(--font-badge);
+      font-weight: 800;
+      padding: 6px 18px;
+      border-radius: 999px;
+      background: var(--primary-blue-dark);
+      color: #ffffff;
+    }
+
+    .qa-badge.back-badge {
+      background: var(--danger-red);
+    }
+
+    .qa-question {
+      font-size: var(--font-subtitle);
+      font-weight: 800;
+      line-height: 1.35;
+      text-align: left;
+      width: 100%;
+    }
+
+    .qa-answer {
+      font-size: var(--font-body);
+      font-weight: 800;
+      line-height: 1.4;
+      text-align: left;
+      width: 100%;
+      color: var(--text-main);
+    }
+
+    .qa-hint {
+      font-size: clamp(20px, 1.4vw, 24px);
+      font-weight: 700;
+      color: var(--primary-blue-dark);
+      background: #ffffff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 2px dashed var(--primary-blue-dark);
+    }
+
+    /* 頁底免責宣告 */
+    .disclaimer-banner {
+      margin-top: 10px;
+      font-size: clamp(18px, 1.25vw, 22px);
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 700;
+      background: #f1f5f9;
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+    }
+
+    /* 底部控制列 (全螢幕按鈕、上一頁/下一頁、頁碼) */
+    .deck-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: clamp(52px, 5.5vh, 68px);
+      background: #f8fafc;
+      border-top: 3px solid var(--border-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 clamp(16px, 3vw, 32px);
+      z-index: 50;
+    }
+
+    .control-group-left, .control-group-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn, .action-btn {
+      background: #ffffff;
+      border: 3px solid var(--border-dark);
+      border-radius: 10px;
+      padding: 6px clamp(12px, 1.6vw, 20px);
+      font-size: clamp(20px, 1.5vw, 26px);
+      font-weight: 800;
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .nav-btn:hover, .action-btn:hover {
+      background: var(--text-main);
+      color: #ffffff;
+    }
+
+    .nav-btn:active, .action-btn:active {
+      transform: scale(0.96);
+    }
+
+    .page-indicator {
+      font-size: clamp(22px, 1.8vw, 30px);
+      font-weight: 900;
+      color: var(--text-main);
+      background: #e2e8f0;
+      padding: 4px 16px;
+      border-radius: 8px;
+      border: 2px solid var(--border-dark);
+    }
+
+    /* 視覺輔助標籤 */
+    .strong-num {
+      font-size: var(--font-highlight);
+      font-weight: 900;
+      color: var(--danger-red);
+      line-height: 1;
+      display: inline-block;
+    }
+
+    .pill-step {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(40px, 3.5vw, 54px);
+      height: clamp(40px, 3.5vw, 54px);
+      background: var(--text-main);
+      color: #ffffff;
+      border-radius: 50%;
+      font-size: clamp(24px, 2vw, 32px);
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .highlight-box {
+      border: 4px solid var(--danger-red);
+      background-color: #fef2f2;
+      border-radius: 16px;
+      padding: clamp(14px, 1.8vw, 24px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 主簡報視窗 (固定 16:9 比例) -->
+  <main class="deck-container" id="presentationDeck">
+    
+    <!-- 點擊左右半部快速換頁感應層 (不含底層按鈕) -->
+    <div class="click-zone-left" id="clickPrev" title="點擊切換上一頁"></div>
+    <div class="click-zone-right" id="clickNext" title="點擊切換下一頁"></div>
+
+    <!-- ==========================================
+         第 1 頁：封面
+         ========================================== -->
+    <section class="slide active" id="slide-1">
+      <div class="slide-content" style="text-align: center; align-items: center;">
+        <span class="header-badge" style="background: var(--primary-blue-dark); font-size: clamp(24px, 1.8vw, 30px); margin-bottom: 24px;">
+          ★ 糖友與長者安心照護指南・15 分鐘衛教
+        </span>
+        <h1 style="font-size: clamp(52px, 5.2vw, 76px); font-weight: 900; line-height: 1.2; margin-bottom: 24px; color: var(--text-main);">
+          低血糖的辨識與處理
+        </h1>
+        <p style="font-size: var(--font-subtitle); font-weight: 700; color: var(--text-muted); max-width: 85%; margin-bottom: 36px;">
+          學會快速辨識 6 大警訊・掌握 15 克糖急救法・保護家人平安
+        </p>
+
+        <div style="display: flex; gap: 24px; justify-content: center; width: 100%; max-width: 900px;">
+          <div class="info-card blue" style="flex: 1; align-items: center; text-align: center; padding: 20px;">
+            <div style="font-size: clamp(28px, 2.2vw, 34px); font-weight: 800;">👨‍⚕️ 記住關鍵「70」</div>
+            <div style="font-size: clamp(22px, 1.6vw, 26px); font-weight: 600; margin-top: 6px;">低於 70 就要馬上處理</div>
+          </div>
+          <div class="info-card alert" style="flex: 1; align-items: center; text-align: center; padding: 20px;">
+            <div style="font-size: clamp(28px, 2.2vw, 34px); font-weight: 800;">🍬 記住「15 法則」</div>
+            <div style="font-size: clamp(22px, 1.6vw, 26px); font-weight: 600; margin-top: 6px;">吃 15 克糖，等 15 分鐘</div>
+          </div>
+        </div>
+
+        <p style="margin-top: 32px; font-size: clamp(22px, 1.5vw, 26px); font-weight: 700; color: var(--primary-blue-dark);">
+          👉 請按鍵盤方向鍵 ➔ 或點擊螢幕右側開始
+        </p>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         第 2 頁：什麼是低血糖（數字 70）
+         ========================================== -->
+    <section class="slide" id="slide-2">
+      <header class="slide-header">
+        <h2>第 1 步：認識關鍵數字「70」</h2>
+        <span class="header-badge">重要觀念</span>
+      </header>
+      <div class="slide-content">
+        <div style="display: flex; gap: clamp(20px, 3vw, 40px); align-items: center; height: 100%;">
+          
+          <!-- 左側巨大數字強調區 -->
+          <div class="info-card alert" style="flex: 1.1; height: 100%; justify-content: center; align-items: center; text-align: center;">
+            <div style="font-size: var(--font-subtitle); font-weight: 800; color: var(--danger-red-dark); margin-bottom: 8px;">
+              低血糖警戒標準
+            </div>
+            <div style="display: flex; align-items: baseline; justify-content: center; gap: 8px;">
+              <span style="font-size: clamp(38px, 3.5vw, 56px); font-weight: 900; color: var(--danger-red);">低於</span>
+              <span class="strong-num" style="font-size: clamp(96px, 10vw, 140px);">70</span>
+              <span style="font-size: clamp(28px, 2.4vw, 36px); font-weight: 800; color: var(--text-muted);">mg/dL</span>
+            </div>
+            <div style="font-size: clamp(24px, 2vw, 30px); font-weight: 800; background: #ffffff; padding: 10px 24px; border-radius: 12px; border: 2px solid var(--danger-red); margin-top: 12px;">
+              🚨 只要測出來 &lt; 70，立刻視為低血糖！
+            </div>
+          </div>
+
+          <!-- 右側重要警語與長者特性 -->
+          <div style="flex: 1.3; display: flex; flex-direction: column; gap: 18px; justify-content: center;">
+            <div class="info-card" style="border-left: 8px solid var(--primary-blue);">
+              <div class="card-title" style="color: var(--primary-blue-dark);">
+                📌 什麼是正常血糖？
+              </div>
+              <p>健康成年人空腹血糖約在 <strong>70～99 mg/dL</strong> 之間。一旦掉到 70 以下，大腦與身體就會缺糖告急！</p>
+            </div>
+
+            <div class="info-card warning" style="border-left: 8px solid var(--warning-amber);">
+              <div class="card-title" style="color: var(--warning-amber);">
+                ⚠️ 長者特別注意：「無症狀低血糖」
+              </div>
+              <p>60 歲以上長輩因神經感覺較退化，<strong>就算血糖很低也可能「完全不覺得餓或發抖」</strong>。若儀器測出低於 70，就算沒感覺也<strong>必須立刻處理</strong>！</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         第 3 頁：常見症狀（6 個，用純 SVG 大圖示）
+         ========================================== -->
+    <section class="slide" id="slide-3">
+      <header class="slide-header">
+        <h2>身體發出的 6 大警訊（請留意長者反應）</h2>
+        <span class="header-badge" style="background: var(--danger-red);">警訊觀察</span>
+      </header>
+      <div class="slide-content">
+        <div class="symptom-grid">
+          
+          <!-- 1. 手抖發抖 -->
+          <div class="symptom-card">
+            <div class="symptom-icon">
+              <!-- SVG: 顫抖手掌 -->
+              <svg viewBox="0 0 24 24">
+                <path d="M18 11V6a2 2 0 0 0-4 0v5"/>
+                <path d="M14 10V4a2 2 0 0 0-4 0v7"/>
+                <path d="M10 10.5V6a2 2 0 0 0-4 0v8"/>
+                <path d="M18 8a2 2 0 0 1 4 2v6a7 7 0 0 1-14 0"/>
+                <path d="M2 10l2 2-2 2"/>
+                <path d="M22 10l-2 2 2 2"/>
+              </svg>
+            </div>
+            <div class="symptom-text">
+              <h3>1. 雙手發抖</h3>
+              <p>手部不受控制顫抖、拿水杯筷子拿不穩</p>
+            </div>
+          </div>
+
+          <!-- 2. 冒冷汗 -->
+          <div class="symptom-card">
+            <div class="symptom-icon">
+              <!-- SVG: 汗滴與額頭 -->
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                <path d="M12 9v5"/>
+                <path d="M10 14h4"/>
+              </svg>
+            </div>
+            <div class="symptom-text">
+              <h3>2. 全身冒冷汗</h3>
+              <p>額頭、頸部與背部皮膚摸起來濕冷</p>
+            </div>
+          </div>
+
+          <!-- 3. 心跳好快 -->
+          <div class="symptom-card">
+            <div class="symptom-icon">
+              <!-- SVG: 跳動心臟與心電脈衝 -->
+              <svg viewBox="0 0 24 24">
+                <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/>
+                <path d="M7 13h2l2-3 2 6 2-3h2"/>
+              </svg>
+            </div>
+            <div class="symptom-text">
+              <h3>3. 心跳加速</h3>
+              <p>心慌心悸、胸口撲通跳、坐立難安</p>
+            </div>
+          </div>
+
+          <!-- 4. 頭暈腳軟 -->
+          <div class="symptom-card">
+            <div class="symptom-icon">
+              <!-- SVG: 眩暈旋轉 -->
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 7v5l3 3"/>
+                <path d="M8 8a6 6 0 0 1 8 0"/>
+                <path d="M8 16a6 6 0 0 0 8 0"/>
+              </svg>
+            </div>
+            <div class="symptom-text">
+              <h3>4. 頭暈發昏</h3>
+              <p>頭重腳輕、腳步發軟無力、站不穩</p>
+            </div>
+          </div>
+
+          <!-- 5. 突然很餓 -->
+          <div class="symptom-card">
+            <div class="symptom-icon">
+              <!-- SVG: 刀叉與餐盤 -->
+              <svg viewBox="0 0 24 24">
+                <path d="M18 2v20"/>
+                <path d="M21 2v6a3 3 0 0 1-3 3h0"/>
+                <path d="M3 2v7c0 1.66 1.34 3 3 3h0v10"/>
+                <path d="M6 2v6"/>
+                <path d="M9 2v7c0 1.66-1.34 3-3 3"/>
+              </svg>
+            </div>
+            <div class="symptom-text">
+              <h3>5. 飢餓難耐</h3>
+              <p>突如其來的劇烈飢餓感、腹部空虛</p>
+            </div>
+          </div>
+
+          <!-- 6. 視力模糊/說話慢 -->
+          <div class="symptom-card">
+            <div class="symptom-icon">
+              <!-- SVG: 眼睛視力 -->
+              <svg viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+                <line x1="2" y1="2" x2="22" y2="22"/>
+              </svg>
+            </div>
+            <div class="symptom-text">
+              <h3>6. 視力模糊/反應慢</h3>
+              <p>看東西看不清、講話不清楚或嗜睡叫不醒</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         第 4 頁：立刻做的三件事（15 克糖的例子）
+         ========================================== -->
+    <section class="slide" id="slide-4">
+      <header class="slide-header">
+        <h2>發生低血糖，立刻做「3 件事」！</h2>
+        <span class="header-badge" style="background: var(--danger-red);">急救處置</span>
+      </header>
+      <div class="slide-content">
+        <div style="display: flex; gap: 24px; height: 100%;">
+          
+          <!-- 步驟 1 與 步驟 3 -->
+          <div style="flex: 1.1; display: flex; flex-direction: column; gap: 16px; justify-content: space-between;">
+            <div class="info-card" style="border-left: 8px solid var(--primary-blue);">
+              <div class="card-title">
+                <span class="pill-step">1</span> 立刻停下手邊動作，坐下或躺下
+              </div>
+              <p style="font-size: clamp(24px, 1.8vw, 28px); margin-left: 54px;">
+                千萬不要勉強走動！就地坐好，防止因頭暈腿軟摔倒導致骨折或撞傷。
+              </p>
+            </div>
+
+            <div class="info-card alert" style="border-left: 8px solid var(--danger-red);">
+              <div class="card-title" style="color: var(--danger-red-dark);">
+                <span class="pill-step" style="background: var(--danger-red);">3</span> ⚠️ 切記：不要吃巧克力或蛋糕！
+              </div>
+              <p style="font-size: clamp(24px, 1.8vw, 28px); margin-left: 54px;">
+                <strong>巧克力、冰淇淋、糕點</strong>含有大量油脂，會延緩糖分吸收，<strong>急救速度太慢</strong>，請務必吃純糖類！
+              </p>
+            </div>
+          </div>
+
+          <!-- 步驟 2：15 克糖範例 (4 選 1) -->
+          <div class="info-card success" style="flex: 1.4; border-width: 4px; justify-content: space-between;">
+            <div>
+              <div class="card-title" style="color: #14532d; font-size: clamp(32px, 2.4vw, 38px);">
+                <span class="pill-step" style="background: var(--success-green);">2</span> 
+                立刻吃「15 克」純糖分（4 選 1）
+              </div>
+              <p style="font-size: clamp(24px, 1.7vw, 28px); color: #166534; margin-top: 6px; font-weight: 700;">
+                選擇最容易吸收的液體或小顆純糖：
+              </p>
+            </div>
+
+            <div class="card-grid card-grid-2" style="margin: 12px 0;">
+              <div style="background: #ffffff; border: 3px solid var(--success-green); border-radius: 12px; padding: 12px; text-align: center;">
+                <div style="font-size: clamp(36px, 3.2vw, 44px);">🍬</div>
+                <div style="font-size: clamp(24px, 1.8vw, 28px); font-weight: 800; color: #14532d;">方糖 3～4 顆</div>
+                <div style="font-size: 20px; color: var(--text-muted);">含服或泡溫水喝</div>
+              </div>
+
+              <div style="background: #ffffff; border: 3px solid var(--success-green); border-radius: 12px; padding: 12px; text-align: center;">
+                <div style="font-size: clamp(36px, 3.2vw, 44px);">🧃</div>
+                <div style="font-size: clamp(24px, 1.8vw, 28px); font-weight: 800; color: #14532d;">養樂多 1 瓶</div>
+                <div style="font-size: 20px; color: var(--text-muted);">100 ml 剛好約 15g 糖</div>
+              </div>
+
+              <div style="background: #ffffff; border: 3px solid var(--success-green); border-radius: 12px; padding: 12px; text-align: center;">
+                <div style="font-size: clamp(36px, 3.2vw, 44px);">🥤</div>
+                <div style="font-size: clamp(24px, 1.8vw, 28px); font-weight: 800; color: #14532d;">果汁 / 汽水半杯</div>
+                <div style="font-size: 20px; color: var(--text-muted);">約 120～150 ml (非無糖)</div>
+              </div>
+
+              <div style="background: #ffffff; border: 3px solid var(--success-green); border-radius: 12px; padding: 12px; text-align: center;">
+                <div style="font-size: clamp(36px, 3.2vw, 44px);">🍯</div>
+                <div style="font-size: clamp(24px, 1.8vw, 28px); font-weight: 800; color: #14532d;">蜂蜜 / 糖水 1 湯匙</div>
+                <div style="font-size: 20px; color: var(--text-muted);">約 15 ml 攪拌吞下</div>
+              </div>
+            </div>
+
+            <div style="font-size: clamp(22px, 1.5vw, 26px); font-weight: 800; color: #14532d; text-align: center;">
+              💡 家中常備養樂多或方糖，急救最順手！
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         第 5 頁：15 分鐘後再測一次
+         ========================================== -->
+    <section class="slide" id="slide-5">
+      <header class="slide-header">
+        <h2>關鍵「15 法則」：休息 15 分鐘，再測一次！</h2>
+        <span class="header-badge" style="background: var(--primary-blue);">追蹤確認</span>
+      </header>
+      <div class="slide-content">
+        
+        <!-- 上方時間提示 -->
+        <div style="background: #e0f2fe; border: 3px solid var(--primary-blue); border-radius: 14px; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <span style="font-size: clamp(36px, 3vw, 48px);">⏱️</span>
+            <div style="font-size: clamp(26px, 2vw, 32px); font-weight: 800; color: var(--primary-blue-dark);">
+              吃完糖後，請安靜坐著休息 15 分鐘，時間到了立刻重新測血糖！
+            </div>
+          </div>
+        </div>
+
+        <!-- 兩種結果判斷分支 -->
+        <div class="card-grid card-grid-2" style="flex: 1;">
+          
+          <!-- 情況 A：依然低於 70 -->
+          <div class="info-card alert" style="border-width: 4px; justify-content: space-between;">
+            <div>
+              <div class="card-title" style="color: var(--danger-red-dark); font-size: clamp(30px, 2.3vw, 36px);">
+                ❌ 情況 A：血糖依然 &lt; 70 mg/dL
+              </div>
+              <p style="font-size: clamp(24px, 1.8vw, 28px); margin-top: 10px; line-height: 1.4;">
+                代表剛剛補充的糖分還不夠，大腦與身體依然處於危險中！
+              </p>
+            </div>
+
+            <div style="background: #ffffff; border: 3px solid var(--danger-red); border-radius: 14px; padding: 16px;">
+              <div style="font-size: clamp(26px, 2vw, 32px); font-weight: 900; color: var(--danger-red);">
+                👉 再吃一次 15 克糖！
+              </div>
+              <p style="font-size: clamp(22px, 1.6vw, 26px); color: var(--text-main); margin-top: 6px;">
+                再吃 3~4 顆方糖或半杯果汁，並<strong>再等 15 分鐘後測量</strong>。
+              </p>
+            </div>
+          </div>
+
+          <!-- 情況 B：已回升到 70 以上 -->
+          <div class="info-card success" style="border-width: 4px; justify-content: space-between;">
+            <div>
+              <div class="card-title" style="color: #14532d; font-size: clamp(30px, 2.3vw, 36px);">
+                ✅ 情況 B：血糖已回升 ≧ 70 mg/dL
+              </div>
+              <p style="font-size: clamp(24px, 1.8vw, 28px); margin-top: 10px; line-height: 1.4;">
+                代表已脫離急性危險，恭喜急救成功！
+              </p>
+            </div>
+
+            <div style="background: #ffffff; border: 3px solid var(--success-green); border-radius: 14px; padding: 16px;">
+              <div style="font-size: clamp(26px, 2vw, 32px); font-weight: 900; color: #14532d;">
+                👉 若離正餐超過 1 小時，請吃小點心
+              </div>
+              <p style="font-size: clamp(22px, 1.6vw, 26px); color: var(--text-main); margin-top: 6px;">
+                可吃 <strong>蘇打餅乾 3 片</strong> 或 <strong>鮮奶 1 杯</strong>，避免藥效持續導致血糖再度掉下來。
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         第 6 頁：什麼情況要送醫
+         ========================================== -->
+    <section class="slide" id="slide-6">
+      <header class="slide-header" style="border-bottom-color: var(--danger-red);">
+        <h2 style="color: var(--danger-red);">出現這 3 種危急情況，立刻打 119 送醫！</h2>
+        <span class="header-badge" style="background: var(--danger-red);">緊急通報</span>
+      </header>
+      <div class="slide-content">
+        <div style="display: flex; gap: 24px; height: 100%;">
+          
+          <!-- 3 大危急指標 -->
+          <div style="flex: 1.4; display: flex; flex-direction: column; gap: 16px; justify-content: space-between;">
+            
+            <div class="info-card alert" style="border-left: 10px solid var(--danger-red); padding: 16px 20px;">
+              <div style="font-size: clamp(28px, 2.1vw, 34px); font-weight: 900; color: var(--danger-red-dark);">
+                🚨 情況一：長者意識不清、昏迷或叫不醒
+              </div>
+              <p style="font-size: clamp(24px, 1.7vw, 28px); margin-top: 4px;">
+                大腦嚴重缺糖陷入昏迷，隨時有生命危險，一刻都不能耽擱！
+              </p>
+            </div>
+
+            <div class="info-card alert" style="border-left: 10px solid var(--danger-red); padding: 16px 20px;">
+              <div style="font-size: clamp(28px, 2.1vw, 34px); font-weight: 900; color: var(--danger-red-dark);">
+                🚨 情況二：全身抽搐、抽筋或無法吞嚥
+              </div>
+              <p style="font-size: clamp(24px, 1.7vw, 28px); margin-top: 4px;">
+                患者已無法自行吞嚥，身體神經出現異常放電反應。
+              </p>
+            </div>
+
+            <div class="info-card alert" style="border-left: 10px solid var(--danger-red); padding: 16px 20px;">
+              <div style="font-size: clamp(28px, 2.1vw, 34px); font-weight: 900; color: var(--danger-red-dark);">
+                🚨 情況三：連續吃了 2 次糖，血糖依然低於 70
+              </div>
+              <p style="font-size: clamp(24px, 1.7vw, 28px); margin-top: 4px;">
+                體內降血糖藥物作用過強或身體代謝異常，必須由醫師注射葡萄糖！
+              </p>
+            </div>
+
+          </div>
+
+          <!-- 右側重要警語：嚴禁灌食 -->
+          <div class="highlight-box" style="flex: 1.1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-width: 5px;">
+            <div style="font-size: clamp(52px, 5vw, 68px); margin-bottom: 8px;">🚫 🙅‍♂️</div>
+            <div style="font-size: clamp(34px, 2.6vw, 42px); font-weight: 900; color: var(--danger-red); line-height: 1.25; margin-bottom: 14px;">
+              昏迷時【絕對不能】<br>強行灌糖水或食物！
+            </div>
+            <p style="font-size: clamp(24px, 1.8vw, 28px); font-weight: 700; color: var(--danger-red-dark); line-height: 1.4; background: #ffffff; padding: 14px 18px; border-radius: 12px; border: 2px dashed var(--danger-red);">
+              ⚠️ 長者昏迷時吞嚥反射消失，硬灌任何液體會直接嗆入氣管，造成<strong>窒息</strong>或致命性<strong>吸入性肺炎</strong>！
+            </p>
+            <div style="margin-top: 16px; font-size: clamp(24px, 1.8vw, 30px); font-weight: 900; color: var(--text-main);">
+              👉 應讓患者<strong>側躺保持呼吸順暢</strong>，速撥 119！
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         第 7 頁：怎麼預防（吃藥、進食、運動時間）
+         ========================================== -->
+    <section class="slide" id="slide-7">
+      <header class="slide-header">
+        <h2>平時怎麼預防？記好「吃藥、吃飯、運動」3 要訣</h2>
+        <span class="header-badge" style="background: var(--success-green);">預防勝於急救</span>
+      </header>
+      <div class="slide-content">
+        <div class="card-grid card-grid-3" style="height: 100%;">
+          
+          <!-- 1. 吃飯時間 -->
+          <div class="info-card" style="border-top: 10px solid var(--primary-blue); justify-content: space-between;">
+            <div>
+              <div style="font-size: clamp(38px, 3.2vw, 48px); margin-bottom: 8px;">🍚</div>
+              <div style="font-size: clamp(28px, 2.2vw, 34px); font-weight: 900; color: var(--primary-blue-dark); margin-bottom: 8px;">
+                1. 按時定量用餐
+              </div>
+              <p style="font-size: clamp(24px, 1.7vw, 28px); line-height: 1.45;">
+                吃降血糖藥或打胰島素後，<strong>15～30 分鐘內一定要吃主餐</strong>！
+              </p>
+            </div>
+            <div style="background: var(--primary-blue-light); padding: 10px; border-radius: 10px; font-size: clamp(20px, 1.4vw, 24px); font-weight: 700; color: var(--primary-blue-dark);">
+              💡 切忌延誤用餐或空腹太久
+            </div>
+          </div>
+
+          <!-- 2. 吃藥時間 -->
+          <div class="info-card" style="border-top: 10px solid var(--warning-amber); justify-content: space-between;">
+            <div>
+              <div style="font-size: clamp(38px, 3.2vw, 48px); margin-bottom: 8px;">💊</div>
+              <div style="font-size: clamp(28px, 2.2vw, 34px); font-weight: 900; color: var(--warning-amber); margin-bottom: 8px;">
+                2. 遵守醫囑不加藥
+              </div>
+              <p style="font-size: clamp(24px, 1.7vw, 28px); line-height: 1.45;">
+                不可自己覺得血糖高就<strong>隨意增加藥量</strong>。若生病胃口差吃得少，應諮詢醫師調藥。
+              </p>
+            </div>
+            <div style="background: var(--warning-amber-light); padding: 10px; border-radius: 10px; font-size: clamp(20px, 1.4vw, 24px); font-weight: 700; color: var(--warning-amber);">
+              💡 忘記吃藥不可在下次吃雙倍
+            </div>
+          </div>
+
+          <!-- 3. 運動時間 -->
+          <div class="info-card" style="border-top: 10px solid var(--success-green); justify-content: space-between;">
+            <div>
+              <div style="font-size: clamp(38px, 3.2vw, 48px); margin-bottom: 8px;">🚶‍♂️</div>
+              <div style="font-size: clamp(28px, 2.2vw, 34px); font-weight: 900; color: var(--success-green); margin-bottom: 8px;">
+                3. 飯後運動隨身帶糖
+              </div>
+              <p style="font-size: clamp(24px, 1.7vw, 28px); line-height: 1.45;">
+                運動選在<strong>飯後 1 小時</strong>，不要空腹出門！出門包包隨身帶<strong>方糖與健保卡/糖尿病卡</strong>。
+              </p>
+            </div>
+            <div style="background: var(--success-green-light); padding: 10px; border-radius: 10px; font-size: clamp(20px, 1.4vw, 24px); font-weight: 700; color: var(--success-green);">
+              💡 口袋有糖，外出散步不心慌
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         第 8 頁：翻牌問答 3 題 + 免責聲明
+         ========================================== -->
+    <section class="slide" id="slide-8">
+      <header class="slide-header">
+        <h2>動動腦翻牌測驗（請點一下卡片翻面看答案）</h2>
+        <span class="header-badge" style="background: var(--primary-blue-dark);">互動問答</span>
+      </header>
+      <div class="slide-content">
+        
+        <!-- 3 個翻牌卡片 -->
+        <div class="qa-grid">
+          
+          <!-- 卡片 1 -->
+          <div class="flip-card interactive" onclick="toggleCard(this)" title="點擊卡片翻面">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <span class="qa-badge">問題 1</span>
+                <div class="qa-question">
+                  低血糖很不舒服，可以直接吃「巧克力」或喝「珍珠奶茶」急救嗎？
+                </div>
+                <div class="qa-hint">👆 點擊翻面看解答</div>
+              </div>
+              <div class="flip-card-back">
+                <span class="qa-badge back-badge">解答 1</span>
+                <div class="qa-answer">
+                  <div style="font-size: clamp(26px, 2vw, 32px); font-weight: 900; color: var(--danger-red); margin-bottom: 6px;">
+                    ❌ 不可以！
+                  </div>
+                  巧克力與奶茶含有<strong>高油脂與蛋白質</strong>，會大幅延緩胃部排空，讓糖分吸收變慢，急救會來不及！請務必選<strong>方糖、果汁或養樂多</strong>！
+                </div>
+                <div class="qa-hint" style="color: var(--danger-red); border-color: var(--danger-red);">
+                  🔄 點擊翻回問題
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 卡片 2 -->
+          <div class="flip-card interactive" onclick="toggleCard(this)" title="點擊卡片翻面">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <span class="qa-badge">問題 2</span>
+                <div class="qa-question">
+                  長輩若已意識不清、昏迷叫不醒，家屬可以灌糖水給他喝嗎？
+                </div>
+                <div class="qa-hint">👆 點擊翻面看解答</div>
+              </div>
+              <div class="flip-card-back">
+                <span class="qa-badge back-badge">解答 2</span>
+                <div class="qa-answer">
+                  <div style="font-size: clamp(26px, 2vw, 32px); font-weight: 900; color: var(--danger-red); margin-bottom: 6px;">
+                    ❌ 絕對不行！
+                  </div>
+                  昏迷時喉嚨反射消失，強灌液體會直接嗆入氣管，造成<strong>窒息</strong>或<strong>吸入性肺炎</strong>死亡！請讓長輩側躺保持呼吸通暢，並立刻撥打 119 送醫！
+                </div>
+                <div class="qa-hint" style="color: var(--danger-red); border-color: var(--danger-red);">
+                  🔄 點擊翻回問題
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 卡片 3 -->
+          <div class="flip-card interactive" onclick="toggleCard(this)" title="點擊卡片翻面">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <span class="qa-badge">問題 3</span>
+                <div class="qa-question">
+                  剛吃完 15 克糖，覺得精神好很多、不抖了，就可以不用再測血糖嗎？
+                </div>
+                <div class="qa-hint">👆 點擊翻面看解答</div>
+              </div>
+              <div class="flip-card-back">
+                <span class="qa-badge back-badge">解答 3</span>
+                <div class="qa-answer">
+                  <div style="font-size: clamp(26px, 2vw, 32px); font-weight: 900; color: var(--danger-red); margin-bottom: 6px;">
+                    ❌ 不可以！
+                  </div>
+                  自覺症狀改善不代表血糖已經回到安全範圍！一定要在<strong>吃完糖 15 分鐘後重新測量</strong>，確認數值確實達到 <strong>70 mg/dL 以上</strong>才算安全！
+                </div>
+                <div class="qa-hint" style="color: var(--danger-red); border-color: var(--danger-red);">
+                  🔄 點擊翻回問題
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 頁底規範警語 -->
+        <div class="disclaimer-banner">
+          ⚠️ 本簡報使用 AI 協助製作，內容請以醫療人員說明為準
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         底部全域控制列 (上一頁、下一頁、頁碼、全螢幕)
+         ========================================== -->
+    <footer class="deck-controls">
+      <div class="control-group-left">
+        <button class="nav-btn interactive" id="btnPrev" title="上一頁 (鍵盤 ⬅)">
+          ◀ 上一頁
+        </button>
+        <button class="nav-btn interactive" id="btnNext" title="下一頁 (鍵盤 ➡)">
+          下一頁 ▶
+        </button>
+      </div>
+
+      <div class="control-group-right">
+        <div class="page-indicator" id="pageIndicator" aria-live="polite">
+          第 1 / 8 頁
+        </div>
+        <button class="action-btn interactive" id="btnFullscreen" title="全螢幕切換">
+          ⛶ 全螢幕
+        </button>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- ==========================================
+       內嵌 JavaScript：翻頁、觸控、鍵盤、全螢幕、翻牌
+       ========================================== -->
+  <script>
+    (function () {
+      const TOTAL_SLIDES = 8;
+      let currentSlide = 1;
+
+      // 取得關鍵 DOM
+      const deck = document.getElementById('presentationDeck');
+      const pageIndicator = document.getElementById('pageIndicator');
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const btnFullscreen = document.getElementById('btnFullscreen');
+      const clickPrev = document.getElementById('clickPrev');
+      const clickNext = document.getElementById('clickNext');
+
+      // 更新頁面顯示
+      function showSlide(index) {
+        if (index < 1) index = 1;
+        if (index > TOTAL_SLIDES) index = TOTAL_SLIDES;
+        currentSlide = index;
+
+        // 切換 active class
+        for (let i = 1; i <= TOTAL_SLIDES; i++) {
+          const slideEl = document.getElementById(`slide-${i}`);
+          if (slideEl) {
+            if (i === currentSlide) {
+              slideEl.classList.add('active');
+            } else {
+              slideEl.classList.remove('active');
+            }
+          }
+        }
+
+        // 更新頁碼指示器
+        if (pageIndicator) {
+          pageIndicator.textContent = `第 ${currentSlide} / ${TOTAL_SLIDES} 頁`;
+        }
+
+        // 按鈕狀態微調
+        if (btnPrev) btnPrev.style.opacity = currentSlide === 1 ? '0.5' : '1';
+        if (btnNext) btnNext.style.opacity = currentSlide === TOTAL_SLIDES ? '0.5' : '1';
+      }
+
+      function nextSlide() {
+        if (currentSlide < TOTAL_SLIDES) {
+          showSlide(currentSlide + 1);
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 1) {
+          showSlide(currentSlide - 1);
+        }
+      }
+
+      // 1. 按鈕事件綁定
+      btnPrev.addEventListener('click', (e) => {
+        e.stopPropagation();
+        prevSlide();
+      });
+
+      btnNext.addEventListener('click', (e) => {
+        e.stopPropagation();
+        nextSlide();
+      });
+
+      // 2. 螢幕左右感應區點擊換頁
+      clickPrev.addEventListener('click', (e) => {
+        prevSlide();
+      });
+
+      clickNext.addEventListener('click', (e) => {
+        nextSlide();
+      });
+
+      // 3. 鍵盤事件支援 (左右方向鍵、上下鍵、PageUp/Down、Space)
+      window.addEventListener('keydown', (e) => {
+        // 若在輸入框則略過
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+          e.preventDefault();
+          prevSlide();
+        }
+      });
+
+      // 4. 手機觸控左右滑動支援 (Swipe)
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStartTime = 0;
+
+      deck.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchStartTime = Date.now();
+        }
+      }, { passive: true });
+
+      deck.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length === 1) {
+          const deltaX = e.changedTouches[0].clientX - touchStartX;
+          const deltaY = e.changedTouches[0].clientY - touchStartY;
+          const deltaTime = Date.now() - touchStartTime;
+
+          // 判斷水平滑動距離大於 40px，且垂直移動小於水平移動
+          if (deltaTime < 600 && Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX < 0) {
+              nextSlide(); // 向左滑 -> 下一頁
+            } else {
+              prevSlide(); // 向右滑 -> 上一頁
+            }
+          }
+        }
+      }, { passive: true });
+
+      // 5. 全螢幕切換功能
+      btnFullscreen.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFullScreen();
+      });
+
+      function toggleFullScreen() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+          }
+          btnFullscreen.textContent = '❌ 退出全螢幕';
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+          btnFullscreen.textContent = '⛶ 全螢幕';
+        }
+      }
+
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+          btnFullscreen.textContent = '⛶ 全螢幕';
+        } else {
+          btnFullscreen.textContent = '❌ 退出全螢幕';
+        }
+      });
+
+      // 初始化顯示第一頁
+      showSlide(1);
+
+      // 全域開放給翻牌點擊函式
+      window.toggleCard = function (cardElement) {
+        if (cardElement) {
+          cardElement.classList.toggle('is-flipped');
+        }
+      };
+    })();
+  </script>
+</body>
+</html
